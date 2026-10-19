@@ -1,0 +1,45 @@
+name: Import legacy learning site
+on:
+  push:
+    branches: [migration/source-snapshot]
+    paths: [.github/workflows/import-legacy.yml]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout destination migration branch
+        uses: actions/checkout@v4
+        with:
+          ref: migration/source-snapshot
+          persist-credentials: true
+      - name: Fetch original read-only and import assets and lessons
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --depth 1 https://github.com/Anesthesiologist20/kids-learning.git /tmp/kids-learning-source
+          rsync -a --exclude='.git/' --exclude='.github/' --exclude='AGENTS.md' --exclude='skills/' --exclude='docs/' /tmp/kids-learning-source/ ./
+          python3 - <<'PY'
+          from pathlib import Path
+          for path in Path('.').rglob('*'):
+              if not path.is_file() or '.git' in path.parts or '.github' in path.parts:
+                  continue
+              if path.suffix.lower() not in ('.html','.css','.js','.json','.webmanifest','.xml','.txt'):
+                  continue
+              try:
+                  content=path.read_text(encoding='utf-8')
+              except UnicodeError:
+                  continue
+              updated=content.replace('/kids-learning/', '/kids-learn-2/')
+              if updated!=content:
+                  path.write_text(updated,encoding='utf-8')
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          if ! git diff --cached --quiet; then
+            git commit -m 'Import full legacy lessons and assets into independent v2'
+            git push origin HEAD:migration/source-snapshot
+          fi

@@ -38,6 +38,11 @@ jobs:
           PY
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          echo 'Checking essential migrated assets and lessons'
+          for file in index.html sakinah/index.html aboud/index.html raghd/index.html icons/icon-192.png icons/icon-512.png raghd/name-practice.png; do
+            test -f "$file" || { echo "MISSING: $file"; exit 1; }
+          done
+          echo "Imported file count: $(find . -type f -not -path './.git/*' | wc -l)"
           git add -A
           if ! git diff --cached --quiet; then
             git commit -m 'Import full legacy lessons and assets into independent v2'

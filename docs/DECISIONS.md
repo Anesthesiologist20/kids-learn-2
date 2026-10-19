@@ -9,3 +9,13 @@
 - Reuse shared components; document lessons learned after each iteration.
 
 Status: repository migration is not yet complete. These are project standards, not claims that implementation exists.
+
+## Agent activation status
+
+The `AGENTS.md` and `skills/` files are instructions for development tooling, not a live AI tutor on GitHub Pages. A real-time interactive AI teacher is NOT enabled. Existing recorded-audio exercises are separate from AI conversation. Do not present a chat button without a working secure backend, speech recognition and explicit approval for child-data handling. Never put API secrets in client-side JavaScript.
+
+## V2 design rollout
+
+- Homepage and child section landing pages have a tablet-first V2 layout on migration/source-snapshot.
+- Existing lesson bodies and AI tutoring are not yet comprehensively upgraded or tested.
+- Keep legacy repository untouched.

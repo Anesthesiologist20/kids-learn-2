@@ -1,5 +1,5 @@
 /* Kids Learning PWA: version 1, network-first updates and offline practice */
-const CACHE = 'kids-learning-pwa-v43';
+const CACHE = 'kids-learn-2-pwa-v1';
 const SHELL = [
  '/kids-learn-2/sakinah/adjective-adventure.html',
  '/kids-learn-2/sakinah/verb-adventure.html',
@@ -231,11 +231,16 @@ const SHELL = [
  '/kids-learn-2/icons/icon-192.png',
  '/kids-learn-2/icons/icon-512.png'
 ];
+// Install only the minimal app shell; individual audio assets are cached on demand.
+// A missing optional audio file must never block service worker installation.
 self.addEventListener('install', event => {
- event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(SHELL)).then(() => self.skipWaiting()));
+ event.waitUntil(caches.open(CACHE).then(cache => cache.addAll([
+  '/kids-learn-2/', '/kids-learn-2/index.html',
+  '/kids-learn-2/sakinah/', '/kids-learn-2/aboud/', '/kids-learn-2/raghd/'
+ ])).then(() => self.skipWaiting()));
 });
 self.addEventListener('activate', event => {
- event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key.startsWith('kids-learning-pwa-') && key !== CACHE).map(key => caches.delete(key)))).then(() => self.clients.claim()));
+ event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => (key.startsWith('kids-learning-pwa-') || key.startsWith('kids-learn-2-pwa-')) && key !== CACHE).map(key => caches.delete(key)))).then(() => self.clients.claim()));
 });
 self.addEventListener('fetch', event => {
  const request = event.request, url = new URL(request.url);
@@ -243,7 +248,7 @@ self.addEventListener('fetch', event => {
  event.respondWith(fetch(request).then(response => {
    if (response.ok) {
      const copy = response.clone();
-     event.waitUntil(caches.open(CACHE).then(cache => cache.put(request, copy)));
+     event.waitUntil(caches.open(CACHE).then(cache => cache.put(request, copy)).catch(() => {}));
    }
    return response;
  }).catch(async () => (await caches.match(request, {ignoreSearch:true})) || (request.mode === 'navigate' ? caches.match('/kids-learn-2/') : Response.error())));

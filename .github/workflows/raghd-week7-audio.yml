@@ -1,0 +1,55 @@
+name: Generate Raghd's Free Kokoro Voices
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/generate_raghd_week7_audio.py"
+      - ".github/workflows/raghd-week7-audio.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: raghd-week7-voices
+  cancel-in-progress: false
+
+jobs:
+  audio:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Check out project
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+      - name: Install speech engine and MP3 encoder
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq espeak-ng ffmpeg
+          python -m pip install --upgrade pip
+          pip install "kokoro>=0.9.4,<1" soundfile numpy
+      - name: Generate all short audio clips in 3 voices
+        run: python scripts/generate_raghd_week7_audio.py
+      - name: Commit reusable recordings
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add raghd/week7/audio/kokoro/
+          if ! git diff --cached --quiet; then
+            git commit -m "audio: add Raghd Week 7 Kokoro Bella Heart Sarah MP3 clips"
+            git push
+          else
+            echo "Already generated — nothing to push."
+          fi
+      - name: Publish newly generated clips
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run pages.yml --ref main

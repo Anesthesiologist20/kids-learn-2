@@ -1,0 +1,17 @@
+{
+  "name": "مغامرات التعلم | Kids Learn 2",
+  "short_name": "Kids Learn 2",
+  "start_url": "/kids-learn-2/",
+  "scope": "/kids-learn-2/",
+  "display": "standalone",
+  "background_color": "#fff9f6",
+  "theme_color": "#ffe0ec",
+  "icons": [
+    {
+      "src": "/kids-learn-2/icons/app.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
